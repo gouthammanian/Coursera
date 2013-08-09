@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <vector>
+#include <queue>
+using namespace std;
+
+#define UNEXPANDED 99999999
+#define MAX_NODE_ID 200
+
+struct ID_DIS
+{
+        int id,distance;
+        bool operator < (const ID_DIS & other) const
+        {
+                return distance > other.distance;
+        }
+        ID_DIS(int p_id,int p_dis):
+        id(p_id),distance(p_dis){};
+};
+
+vector<ID_DIS> adj[MAX_NODE_ID + 1];
+int result[MAX_NODE_ID + 1];
+priority_queue<ID_DIS> distance_heap;
+
+int main () {
+        FILE *fin  = fopen ("dijkstraData.txt", "r");
+        FILE *fout = fopen ("dijkstraData_out2.txt", "w");
+
+        int in_node,in_distance,lead_node;
+        char in_char;
+        while(fscanf(fin,"%d",&in_node) > 0)
+        {
+                fscanf(fin,"%c",&in_char);
+                if(in_char != ',')
+                        lead_node = in_node;
+                else
+                {
+                        fscanf(fin,"%d",&in_distance);
+                        adj[lead_node].push_back(ID_DIS(in_node,in_distance));
+                }
+        }
+
+        fill(result,result + MAX_NODE_ID,UNEXPANDED);
+        distance_heap.push(ID_DIS(1,0));
+        while(!distance_heap.empty())
+        {
+                ID_DIS expanding = distance_heap.top();
+                distance_heap.pop();
+                if(result[expanding.id] != UNEXPANDED) continue;
+                result[expanding.id] = expanding.distance;
+                for(int i = 0 ; i < adj[expanding.id].size() ; i ++)
+                {
+                        distance_heap.push(ID_DIS(adj[expanding.id][i].id,
+                                expanding.distance + adj[expanding.id][i].distance));
+                }
+        }
+
+        fprintf(fout,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+                result[7],result[37],result[59],result[82],result[99],
+                result[115],result[133],result[165],result[188],result[197]);
+       return 0;
+}
